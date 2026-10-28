@@ -1,9 +1,19 @@
 const db = require('../database/db');
+const { registrarAuditoria } = require('../services/auditoria.service');
 
 const crearEspecialidad = async (req, res) => {
     const { descripcion } = req.body;
     try {
-        await db.query('INSERT INTO especialidad (descripcion) VALUES (?)', [descripcion]);
+        const [resultado] = await db.query('INSERT INTO especialidad (descripcion) VALUES (?)', [descripcion]);
+
+        await registrarAuditoria({
+            id_usuario: req.usuario?.id,
+            accion: 'ALTA',
+            tabla: 'especialidad',
+            id_registro: resultado.insertId,
+            detalle: `Alta de especialidad ${descripcion}`
+        });
+
         res.status(201).json({ codigo: 201, estado: "ok", datos: { mensaje: "Especialidad creada exitosamente" } });
     } catch (error) {
         res.status(500).json({ codigo: 500, estado: "error", datos: { mensaje: "Error al crear especialidad", detalle: error.message } });
@@ -24,6 +34,15 @@ const modificarEspecialidad = async (req, res) => {
     const { descripcion } = req.body;
     try {
         await db.query('UPDATE especialidad SET descripcion = ? WHERE id = ?', [descripcion, id]);
+
+        await registrarAuditoria({
+            id_usuario: req.usuario?.id,
+            accion: 'MODIFICACION',
+            tabla: 'especialidad',
+            id_registro: id,
+            detalle: `Modificación de especialidad ${descripcion}`
+        });
+
         res.status(200).json({ codigo: 200, estado: "ok", datos: { mensaje: "Especialidad modificada exitosamente" } });
     } catch (error) {
         res.status(500).json({ codigo: 500, estado: "error", datos: { mensaje: "Error al modificar especialidad", detalle: error.message } });
@@ -44,7 +63,26 @@ const eliminarEspecialidad = async (req, res) => {
             });
         }
 
+        const [agendas] = await db.query('SELECT id FROM agenda WHERE id_especialidad = ?', [id]);
+
+        if (agendas.length > 0) {
+            return res.status(400).json({
+                codigo: 400,
+                estado: "error",
+                datos: { mensaje: "No se puede eliminar la especialidad porque existen agendas médicas configuradas con ella" }
+            });
+        }
+
         await db.query('DELETE FROM especialidad WHERE id = ?', [id]);
+
+        await registrarAuditoria({
+            id_usuario: req.usuario?.id,
+            accion: 'BAJA',
+            tabla: 'especialidad',
+            id_registro: id,
+            detalle: `Baja de especialidad con ID ${id}`
+        });
+
         res.status(200).json({ codigo: 200, estado: "ok", datos: { mensaje: "Especialidad eliminada exitosamente" } });
     } catch (error) {
         res.status(500).json({ codigo: 500, estado: "error", datos: { mensaje: "Error al eliminar especialidad", detalle: error.message } });

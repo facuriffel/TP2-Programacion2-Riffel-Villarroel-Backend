@@ -1,4 +1,5 @@
 const db = require('../database/db');
+const { registrarAuditoria } = require('../services/auditoria.service');
 
 // El GET público de la semana 1[cite: 1]
 const listarCoberturas = async (req, res) => {
@@ -13,7 +14,16 @@ const listarCoberturas = async (req, res) => {
 const crearCobertura = async (req, res) => {
   const { nombre } = req.body;
   try {
-    await db.query('INSERT INTO cobertura (nombre) VALUES (?)', [nombre]);
+    const [resultado] = await db.query('INSERT INTO cobertura (nombre) VALUES (?)', [nombre]);
+
+    await registrarAuditoria({
+      id_usuario: req.usuario?.id,
+      accion: 'ALTA',
+      tabla: 'cobertura',
+      id_registro: resultado.insertId,
+      detalle: `Alta de cobertura ${nombre}`
+    });
+
     res.status(201).json({ codigo: 201, estado: "ok", datos: { mensaje: "Cobertura creada exitosamente" } });
   } catch (error) {
     res.status(500).json({ codigo: 500, estado: "error", datos: { mensaje: "Error al crear cobertura", detalle: error.message } });
@@ -25,6 +35,15 @@ const modificarCobertura = async (req, res) => {
   const { nombre } = req.body;
   try {
     await db.query('UPDATE cobertura SET nombre = ? WHERE id = ?', [nombre, id]);
+
+    await registrarAuditoria({
+      id_usuario: req.usuario?.id,
+      accion: 'MODIFICACION',
+      tabla: 'cobertura',
+      id_registro: id,
+      detalle: `Modificación de cobertura ${nombre}`
+    });
+
     res.status(200).json({ codigo: 200, estado: "ok", datos: { mensaje: "Cobertura modificada exitosamente" } });
   } catch (error) {
     res.status(500).json({ codigo: 500, estado: "error", datos: { mensaje: "Error al modificar cobertura", detalle: error.message } });
@@ -46,6 +65,15 @@ const eliminarCobertura = async (req, res) => {
     }
 
     await db.query('DELETE FROM cobertura WHERE id = ?', [id]);
+
+    await registrarAuditoria({
+      id_usuario: req.usuario?.id,
+      accion: 'BAJA',
+      tabla: 'cobertura',
+      id_registro: id,
+      detalle: `Baja de cobertura con ID ${id}`
+    });
+
     res.status(200).json({ codigo: 200, estado: "ok", datos: { mensaje: "Cobertura eliminada exitosamente" } });
   } catch (error) {
     res.status(500).json({ codigo: 500, estado: "error", datos: { mensaje: "Error al eliminar cobertura", detalle: error.message } });

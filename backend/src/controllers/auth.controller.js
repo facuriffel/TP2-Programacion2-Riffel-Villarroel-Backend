@@ -1,6 +1,7 @@
 const db = require('../database/db');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const { registrarAuditoria } = require('../services/auditoria.service');
 
 const login = async (req, res) => {
     const { dni, contrasena } = req.body;
@@ -55,11 +56,19 @@ const registro = async (req, res) => {
 
 
         const query = `
-            INSERT INTO usuario (nombre, apellido, dni, email, password, fecha_nacimiento, id_cobertura, rol) 
+            INSERT INTO usuario (nombre, apellido, dni, email, password, fecha_nacimiento, id_cobertura, rol)
             VALUES (?, ?, ?, ?, ?, ?, ?, 'paciente')
         `;
 
-        await db.query(query, [nombre, apellido, dni, email, passwordHasheada, fecha_nacimiento, id_cobertura]);
+        const [resultado] = await db.query(query, [nombre, apellido, dni, email, passwordHasheada, fecha_nacimiento, id_cobertura]);
+
+        await registrarAuditoria({
+            id_usuario: resultado.insertId,
+            accion: 'ALTA',
+            tabla: 'usuario',
+            id_registro: resultado.insertId,
+            detalle: `Alta de paciente ${nombre} ${apellido} DNI ${dni} (autorregistro)`
+        });
 
         res.status(201).json({
             codigo: 201,
@@ -73,13 +82,69 @@ const registro = async (req, res) => {
 };
 
 
+// La columna telefono se agrega de forma idempotente para bases creadas antes de este cambio
+let columnaTelefonoLista = false;
+const asegurarColumnaTelefono = async () => {
+    if (columnaTelefonoLista) return;
+    const [cols] = await db.query("SHOW COLUMNS FROM usuario LIKE 'telefono'");
+    if (cols.length === 0) {
+        await db.query('ALTER TABLE usuario ADD COLUMN telefono VARCHAR(30) NULL');
+    }
+    columnaTelefonoLista = true;
+};
+
+const actualizarPerfil = async (req, res) => {
+    const { email, telefono, id_cobertura, contrasena } = req.body || {};
+    const error = (codigo, mensaje) => res.status(codigo).json({ codigo, estado: "error", datos: { mensaje } });
+
+    if (!email || typeof email !== 'string' || email.length > 120 || email.includes(' ') || email.indexOf('@') < 1 || email.lastIndexOf('.') < email.indexOf('@') + 2 || email.endsWith('.')) {
+        return error(400, "El email es obligatorio y debe tener un formato válido.");
+    }
+    if (contrasena && contrasena.length < 6) {
+        return error(400, "La contraseña debe tener al menos 6 caracteres.");
+    }
+
+    try {
+        await asegurarColumnaTelefono();
+        const [duplicados] = await db.query('SELECT id FROM usuario WHERE email = ? AND id <> ?', [email, req.usuario.id]);
+        if (duplicados.length > 0) return error(400, "El email ya se encuentra registrado por otro usuario.");
+
+        if (id_cobertura) {
+            const [cobertura] = await db.query('SELECT id FROM cobertura WHERE id = ?', [id_cobertura]);
+            if (cobertura.length === 0) return error(400, "La cobertura indicada no existe.");
+        }
+
+        const campos = ['email = ?', 'telefono = ?', 'id_cobertura = ?'];
+        const params = [email, telefono || null, id_cobertura || null];
+        if (contrasena) {
+            campos.push('password = ?');
+            params.push(await bcrypt.hash(contrasena, 10));
+        }
+        params.push(req.usuario.id);
+        await db.query(`UPDATE usuario SET ${campos.join(', ')} WHERE id = ?`, params);
+
+        await registrarAuditoria({
+            id_usuario: req.usuario.id,
+            accion: 'MODIFICACION',
+            tabla: 'usuario',
+            id_registro: req.usuario.id,
+            detalle: `Autoedición de datos personales (email, teléfono y/o cobertura)`
+        });
+
+        res.status(200).json({ codigo: 200, estado: "ok", datos: { mensaje: "Datos actualizados correctamente." } });
+    } catch (e) {
+        res.status(500).json({ codigo: 500, estado: "error", datos: { mensaje: "Error al actualizar los datos", detalle: e.message } });
+    }
+};
+
 const perfil = async (req, res) => {
     try {
+        await asegurarColumnaTelefono();
 
         const idUsuario = req.usuario.id;
 
         // Buscamos los datos excluyendo la contraseña por seguridad
-        const [rows] = await db.query('SELECT id, nombre, apellido, dni, email, fecha_nacimiento, rol, id_cobertura, id_sede FROM usuario WHERE id = ?', [idUsuario]);
+        const [rows] = await db.query('SELECT id, nombre, apellido, dni, email, telefono, fecha_nacimiento, rol, id_cobertura, id_sede FROM usuario WHERE id = ?', [idUsuario]);
 
         if (rows.length === 0) {
             return res.status(404).json({ codigo: 404, estado: "error", datos: { mensaje: "Usuario no encontrado" } });
@@ -107,4 +172,4 @@ const obtenerCoberturas = async (req, res) => {
     }
 };
 
-module.exports = { login, registro, perfil, obtenerCoberturas };
+module.exports = { login, registro, perfil, actualizarPerfil, obtenerCoberturas };

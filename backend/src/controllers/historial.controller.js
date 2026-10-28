@@ -12,7 +12,10 @@ const crearHistorial = async (req, res) => {
     }
 
     try {
-        const [turnoRows] = await db.query('SELECT * FROM turno WHERE id = ?', [id_turno]);
+        const [turnoRows] = await db.query(
+            'SELECT t.*, a.id_medico FROM turno t INNER JOIN agenda a ON t.id_agenda = a.id WHERE t.id = ?',
+            [id_turno]
+        );
         if (turnoRows.length === 0) {
             return res.status(404).json({
                 codigo: 404,
@@ -62,6 +65,7 @@ const crearHistorial = async (req, res) => {
             datos: { mensaje: "Historial clínico registrado exitosamente." }
         });
     } catch (error) {
+        console.error('Error SQL en historial:', error);
         res.status(500).json({ codigo: 500, estado: "error", datos: { mensaje: "Error al registrar historial clínico", detalle: error.message } });
     }
 };
@@ -73,14 +77,17 @@ const consultarHistorial = async (req, res) => {
         if (req.usuario.rol === 'paciente') {
             // El paciente accede a la totalidad de su historial clínico[cite: 3]
             const query = `
-                SELECT h.id, h.id_turno, h.diagnostico, h.tratamiento, h.observaciones, h.fecha,
-                       t.fecha AS fecha_turno, t.hora AS hora_turno,
+                SELECT h.id, h.id_turno, h.diagnostico, h.tratamiento, h.observaciones,
+                       DATE_FORMAT(h.fecha, '%Y-%m-%d') AS fecha,
+                       DATE_FORMAT(t.fecha, '%Y-%m-%d') AS fecha_turno, TIME_FORMAT(t.hora, '%H:%i') AS hora_turno,
+                       a.id_medico, a.id_especialidad,
                        u.nombre AS medico_nombre, u.apellido AS medico_apellido,
                        e.descripcion AS especialidad
                 FROM historial_clinico h
                 JOIN turno t ON h.id_turno = t.id
-                JOIN usuario u ON t.id_medico = u.id
-                JOIN especialidad e ON t.id_especialidad = e.id
+                JOIN agenda a ON t.id_agenda = a.id
+                LEFT JOIN usuario u ON a.id_medico = u.id
+                LEFT JOIN especialidad e ON a.id_especialidad = e.id
                 WHERE t.id_paciente = ?
                 ORDER BY h.fecha DESC
             `;
@@ -97,24 +104,30 @@ const consultarHistorial = async (req, res) => {
             }
 
             const query = `
-                SELECT h.id, h.id_turno, h.diagnostico, h.tratamiento, h.observaciones, h.fecha,
-                       t.fecha AS fecha_turno, t.hora AS hora_turno,
-                       p.nombre AS paciente_nombre, p.apellido AS paciente_apellido
+                SELECT h.id, h.id_turno, h.diagnostico, h.tratamiento, h.observaciones,
+                       DATE_FORMAT(h.fecha, '%Y-%m-%d') AS fecha,
+                       DATE_FORMAT(t.fecha, '%Y-%m-%d') AS fecha_turno, TIME_FORMAT(t.hora, '%H:%i') AS hora_turno,
+                       p.nombre AS paciente_nombre, p.apellido AS paciente_apellido,
+                       e.descripcion AS especialidad
                 FROM historial_clinico h
                 JOIN turno t ON h.id_turno = t.id
                 JOIN usuario p ON t.id_paciente = p.id
-                WHERE t.id_medico = ? AND t.id_paciente = ?
+                JOIN agenda a ON t.id_agenda = a.id
+                JOIN especialidad e ON a.id_especialidad = e.id
+                WHERE a.id_medico = ? AND t.id_paciente = ?
                 ORDER BY h.fecha DESC
             `;
             [rows] = await db.query(query, [req.usuario.id, id_paciente]);
         }
 
+        // Sin registros: 200 con lista vacía (nunca 500)
         res.status(200).json({
             codigo: 200,
             estado: "ok",
-            datos: { historial: rows }
+            datos: rows || []
         });
     } catch (error) {
+        console.error('Error SQL en historial:', error);
         res.status(500).json({ codigo: 500, estado: "error", datos: { mensaje: "Error al consultar historial clínico", detalle: error.message } });
     }
 };

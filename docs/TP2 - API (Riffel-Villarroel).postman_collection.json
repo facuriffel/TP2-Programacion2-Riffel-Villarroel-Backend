@@ -145,6 +145,39 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "Actualizar perfil (paciente: email, teléfono, cobertura, contraseña)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/perfil",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "perfil"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"paciente@mail.com\",\n  \"telefono\": \"1122334455\",\n  \"id_cobertura\": 1,\n  \"contrasena\": \"nuevaClave123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Requiere token. email obligatorio; contrasena opcional (mínimo 6 caracteres, se guarda hasheada). La columna telefono se crea automáticamente en la tabla usuario si no existe."
+          },
+          "response": []
         }
       ]
     },
@@ -572,6 +605,105 @@
       ]
     },
     {
+      "name": "Consultas (medico, operador, paciente)",
+      "item": [
+        {
+          "name": "Listar sedes (lectura)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/consultas/sedes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "consultas",
+                "sedes"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Listar especialidades (lectura)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/consultas/especialidades",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "consultas",
+                "especialidades"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Listar médicos con especialidades",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/consultas/medicos?id_sede=1&id_especialidad=1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "consultas",
+                "medicos"
+              ],
+              "query": [
+                {
+                  "key": "id_sede",
+                  "value": "1"
+                },
+                {
+                  "key": "id_especialidad",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Filtros opcionales id_sede e id_especialidad."
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar pacientes (medico/operador)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/consultas/pacientes?dni=12345678&apellido=",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "consultas",
+                "pacientes"
+              ],
+              "query": [
+                {
+                  "key": "dni",
+                  "value": "12345678"
+                },
+                {
+                  "key": "apellido",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Requiere dni o apellido. El médico solo ve pacientes con turnos en su agenda."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
       "name": "Turnos",
       "item": [
         {
@@ -692,6 +824,104 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "Fechas disponibles de un médico (paciente/operador)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/turnos/fechas-disponibles?id_medico=1&id_sede=1&id_especialidad=1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "turnos",
+                "fechas-disponibles"
+              ],
+              "query": [
+                {
+                  "key": "id_medico",
+                  "value": "1"
+                },
+                {
+                  "key": "id_sede",
+                  "value": "1"
+                },
+                {
+                  "key": "id_especialidad",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Fechas futuras con agenda y al menos un horario libre."
+          },
+          "response": []
+        },
+        {
+          "name": "Horarios libres de un médico (paciente/operador)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/turnos/disponibilidad?id_medico=1&id_sede=1&id_especialidad=1&fecha=2026-12-01",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "turnos",
+                "disponibilidad"
+              ],
+              "query": [
+                {
+                  "key": "id_medico",
+                  "value": "1"
+                },
+                {
+                  "key": "id_sede",
+                  "value": "1"
+                },
+                {
+                  "key": "id_especialidad",
+                  "value": "1"
+                },
+                {
+                  "key": "fecha",
+                  "value": "2026-12-01"
+                }
+              ]
+            },
+            "description": "Rango de agenda menos turnos confirmados."
+          },
+          "response": []
+        },
+        {
+          "name": "Listar turnos del médico por fecha y sede",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/turnos?fecha=2026-12-01&id_sede=1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "turnos"
+              ],
+              "query": [
+                {
+                  "key": "fecha",
+                  "value": "2026-12-01"
+                },
+                {
+                  "key": "id_sede",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Filtros fecha e id_sede (médico y operador)."
+          },
+          "response": []
         }
       ]
     },
@@ -802,7 +1032,7 @@
       "description": "CRUD administrativo de usuarios y médicos. Requiere rol administrador. Las mutaciones quedan registradas en log_auditoria (entidad usuario).",
       "item": [
         {
-          "name": "Listar todos los usuarios",
+          "name": "Listar usuarios (paginado y filtrado)",
           "request": {
             "auth": {
               "type": "bearer",
@@ -822,14 +1052,48 @@
                 "type": "text"
               }
             ],
-            "description": "Acceso: exclusivo rol \"administrador\".\n\nParámetros esperados: ninguno (sin body ni query).\n\nRespuesta esperada: formato { codigo, estado, datos }. 200: { \"codigo\": 200, \"estado\": \"ok\", \"datos\": { \"usuarios\": [ { \"id\": number, \"nombre\": string, \"apellido\": string, \"email\": string, \"rol\": string, \"id_cobertura\": number|null, \"id_sede\": number|null } ] } }. 401/403 si el token falta o el rol no es administrador.",
+            "description": "Acceso: exclusivo rol \"administrador\".\n\nParámetros esperados (Query Params, todos opcionales): pagina (number, default 1), limite (number, default 10, máximo 100), nombre (string, búsqueda parcial), apellido (string, búsqueda parcial), rol (string: administrador|medico|operador|paciente), id_sede (number). Orden: apellido y nombre ascendente.\n\nRespuesta esperada: formato { codigo, estado, datos }. 200: { \"codigo\": 200, \"estado\": \"ok\", \"datos\": { \"usuarios\": [ { \"id\": number, \"nombre\": string, \"apellido\": string, \"dni\": string, \"fecha_nacimiento\": datetime|null, \"email\": string, \"rol\": string, \"id_cobertura\": number|null, \"id_sede\": number|null, \"sede\": string|null, \"especialidades\": [ { \"id\": number, \"descripcion\": string } ] } ], \"total\": number, \"pagina\": number, \"limite\": number } }. \"especialidades\" solo se completa para médicos. 401/403 si el token falta o el rol no es administrador.",
             "url": {
-              "raw": "{{base_url}}/usuarios",
+              "raw": "{{base_url}}/usuarios?pagina=1&limite=10&nombre=&apellido=&rol=medico&id_sede=1",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "usuarios"
+              ],
+              "query": [
+                {
+                  "key": "pagina",
+                  "value": "1",
+                  "description": "number (opcional, default 1). Número de página."
+                },
+                {
+                  "key": "limite",
+                  "value": "10",
+                  "description": "number (opcional, default 10, máx. 100). Registros por página."
+                },
+                {
+                  "key": "nombre",
+                  "value": "",
+                  "description": "string (opcional). Búsqueda parcial por nombre.",
+                  "disabled": true
+                },
+                {
+                  "key": "apellido",
+                  "value": "",
+                  "description": "string (opcional). Búsqueda parcial por apellido.",
+                  "disabled": true
+                },
+                {
+                  "key": "rol",
+                  "value": "medico",
+                  "description": "string (opcional). administrador | medico | operador | paciente."
+                },
+                {
+                  "key": "id_sede",
+                  "value": "1",
+                  "description": "number (opcional). Sede asignada al usuario."
+                }
               ]
             }
           },
@@ -861,10 +1125,10 @@
                 "type": "text"
               }
             ],
-            "description": "Acceso: exclusivo rol \"administrador\". Audita ALTA sobre entidad usuario.\n\nParámetros esperados (Body JSON): nombre (string), apellido (string), dni (string/number, requerido), fecha_nacimiento (string YYYY-MM-DD, opcional), email (string), password (string), rol (string: paciente|medico|operador|administrador), id_cobertura (number|null), id_sede (number|null).\n\nRespuesta esperada: formato { codigo, estado, datos }. 201: { \"codigo\": 201, \"estado\": \"ok\", \"datos\": { \"mensaje\": \"Usuario creado exitosamente\" } }.",
+            "description": "Acceso: exclusivo rol \"administrador\". Audita ALTA sobre entidad usuario.\n\nParámetros esperados (Body JSON): nombre (string, requerido), apellido (string, requerido), dni (string, requerido), fecha_nacimiento (string YYYY-MM-DD, opcional), email (string, requerido), password (string, requerido), rol (string: paciente|medico|operador|administrador), id_cobertura (number|null), id_sede (number|null), especialidades (number[], requerido y no vacío si rol = medico).\n\nReglas: operador y médico requieren id_sede; el administrador y el paciente se guardan sin sede. Las especialidades del médico se guardan en medico_especialidad dentro de una transacción.\n\nRespuesta esperada: formato { codigo, estado, datos }. 201: { \"codigo\": 201, \"estado\": \"ok\", \"datos\": { \"mensaje\": \"Usuario creado exitosamente\" } }. 400 si faltan datos obligatorios, sede o especialidades según el rol. 409 si el DNI o el email ya existen.",
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"nombre\": \"Laura\",\n    \"apellido\": \"Gómez\",\n    \"dni\": \"30111222\",\n    \"fecha_nacimiento\": \"1988-04-12\",\n    \"email\": \"laura.gomez@ejemplo.com\",\n    \"password\": \"1234\",\n    \"rol\": \"medico\",\n    \"id_cobertura\": null,\n    \"id_sede\": 1\n}",
+              "raw": "{\n    \"nombre\": \"Laura\",\n    \"apellido\": \"Gómez\",\n    \"dni\": \"30111222\",\n    \"fecha_nacimiento\": \"1988-04-12\",\n    \"email\": \"laura.gomez@ejemplo.com\",\n    \"password\": \"1234\",\n    \"rol\": \"medico\",\n    \"id_cobertura\": null,\n    \"id_sede\": 1,\n    \"especialidades\": [1, 2]\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -909,10 +1173,10 @@
                 "type": "text"
               }
             ],
-            "description": "Acceso: exclusivo rol \"administrador\". Audita MODIFICACION sobre entidad usuario.\n\nParámetros esperados: path id (number). Body JSON: nombre (string), apellido (string), dni (string/number), fecha_nacimiento (string YYYY-MM-DD|null), email (string), rol (string), id_cobertura (number|null), id_sede (number|null). No actualiza password.\n\nRespuesta esperada: formato { codigo, estado, datos }. 200: { \"codigo\": 200, \"estado\": \"ok\", \"datos\": { \"mensaje\": \"Usuario modificado exitosamente\" } }.",
+            "description": "Acceso: exclusivo rol \"administrador\". Audita MODIFICACION sobre entidad usuario.\n\nParámetros esperados (Path: id; Body JSON): nombre, apellido, dni, email (requeridos), fecha_nacimiento (YYYY-MM-DD, opcional), rol, id_cobertura (number|null), id_sede (number|null), especialidades (number[], requerido y no vacío si rol = medico). No modifica la contraseña. Reemplaza las especialidades del médico por las enviadas.\n\nRespuesta esperada: formato { codigo, estado, datos }. 200: { \"codigo\": 200, \"estado\": \"ok\", \"datos\": { \"mensaje\": \"Usuario modificado exitosamente\" } }. 400 por datos inválidos, 404 si el usuario no existe, 409 si el DNI o el email ya pertenecen a otro usuario.",
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"nombre\": \"Laura\",\n    \"apellido\": \"Gómez\",\n    \"dni\": \"30111222\",\n    \"fecha_nacimiento\": \"1988-04-12\",\n    \"email\": \"laura.gomez@ejemplo.com\",\n    \"rol\": \"medico\",\n    \"id_cobertura\": null,\n    \"id_sede\": 1\n}",
+              "raw": "{\n    \"nombre\": \"Laura\",\n    \"apellido\": \"Gómez\",\n    \"dni\": \"30111222\",\n    \"fecha_nacimiento\": \"1988-04-12\",\n    \"email\": \"laura.gomez@ejemplo.com\",\n    \"rol\": \"medico\",\n    \"id_cobertura\": null,\n    \"id_sede\": 1,\n    \"especialidades\": [\n        1,\n        2\n    ]\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -986,7 +1250,7 @@
       "description": "Consulta de log_auditoria. Exclusivo administrador.",
       "item": [
         {
-          "name": "Listar logs de auditoría",
+          "name": "Listar logs de auditoría (paginado y filtrado)",
           "request": {
             "auth": {
               "type": "bearer",
@@ -1006,9 +1270,9 @@
                 "type": "text"
               }
             ],
-            "description": "Acceso: exclusivo rol \"administrador\".\n\nParámetros esperados (Query Params, todos opcionales): id_usuario (number), entidad (string: usuario|sede|especialidad|cobertura), desde (string YYYY-MM-DD), hasta (string YYYY-MM-DD).\n\nRespuesta esperada: formato { codigo, estado, datos }. 200: { \"codigo\": 200, \"estado\": \"ok\", \"datos\": { \"logs\": [ { \"id\": number, \"id_usuario\": number, \"nombre\": string, \"apellido\": string, \"email\": string, \"accion\": string, \"entidad\": string, \"detalle\": string, \"fecha\": datetime } ] } }.",
+            "description": "Acceso: exclusivo rol \"administrador\".\n\nParámetros esperados (Query Params, todos opcionales): pagina (number, default 1), limite (number, default 10, máximo 100), id_usuario (number), usuario (string, búsqueda parcial por nombre, apellido, correo o nombre completo), entidad (string: usuario|sede|especialidad|cobertura), desde (YYYY-MM-DD), hasta (YYYY-MM-DD). Orden: fecha descendente.\n\nRespuesta esperada: formato { codigo, estado, datos }. 200: { \"codigo\": 200, \"estado\": \"ok\", \"datos\": { \"logs\": [ { \"id\": number, \"id_usuario\": number, \"nombre\": string, \"apellido\": string, \"email\": string, \"accion\": \"ALTA\"|\"BAJA\"|\"MODIFICACION\", \"entidad\": string, \"detalle\": string, \"fecha\": datetime } ], \"total\": number, \"pagina\": number, \"limite\": number } }.",
             "url": {
-              "raw": "{{base_url}}/auditoria?id_usuario=1&entidad=usuario&desde=2026-01-01&hasta=2026-12-31",
+              "raw": "{{base_url}}/auditoria?pagina=1&limite=10&usuario=&entidad=usuario&desde=2026-01-01&hasta=2026-12-31",
               "host": [
                 "{{base_url}}"
               ],
@@ -1017,14 +1281,31 @@
               ],
               "query": [
                 {
-                  "key": "id_usuario",
+                  "key": "pagina",
                   "value": "1",
-                  "description": "number (opcional). Usuario que ejecutó la acción."
+                  "description": "number (opcional, default 1). Número de página."
+                },
+                {
+                  "key": "limite",
+                  "value": "10",
+                  "description": "number (opcional, default 10, máx. 100). Registros por página."
+                },
+                {
+                  "key": "id_usuario",
+                  "value": "",
+                  "description": "number (opcional). Usuario que ejecutó la acción, por id.",
+                  "disabled": true
+                },
+                {
+                  "key": "usuario",
+                  "value": "",
+                  "description": "string (opcional). Búsqueda parcial por nombre, apellido o correo del usuario.",
+                  "disabled": true
                 },
                 {
                   "key": "entidad",
                   "value": "usuario",
-                  "description": "string (opcional). Ej.: usuario, sede, especialidad, cobertura."
+                  "description": "string (opcional). usuario, sede, especialidad o cobertura."
                 },
                 {
                   "key": "desde",

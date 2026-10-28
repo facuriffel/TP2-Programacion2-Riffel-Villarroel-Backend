@@ -1,10 +1,14 @@
 const { Router } = require('express');
-const { crearTurno, cancelarTurno, atenderTurno, listarTurnos } = require('../controllers/turno.controller');
+const { crearTurno, cancelarTurno, atenderTurno, listarTurnos, listarDisponibilidad, listarFechasDisponibles } = require('../controllers/turno.controller');
 const { verificarToken, verificarRol } = require('../middlewares/auth.middleware');
 
 const router = Router();
 
 router.use(verificarToken);
+
+// Fechas con agenda y horarios libres de un médico para armar la asignación
+router.get('/fechas-disponibles', verificarRol('paciente', 'operador'), listarFechasDisponibles);
+router.get('/disponibilidad', verificarRol('paciente', 'operador'), listarDisponibilidad);
 
 // Listado accesible por paciente, médico u operador según reglas de negocio
 router.get('/', verificarRol('paciente', 'medico', 'operador'), listarTurnos);
