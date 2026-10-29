@@ -103,7 +103,7 @@ backend/
 - **Transacciones:** las operaciones sensibles a inconsistencias —como la atención de un turno (que actualiza el estado del turno y crea la consulta/historial clínico asociado) y la gestión de usuarios— se ejecutan dentro de transacciones MySQL para garantizar atomicidad.
 - **Autorización por rol:** `middlewares/auth.middleware.js` valida el JWT y restringe cada ruta según el rol del usuario (administrador, operador, médico, paciente).
 
-## Troubleshooting
+## Resolución de fallos
 
 - **Error de conexión a MySQL:** verificar que el servicio MySQL de XAMPP esté corriendo en el puerto `3306` y que `DB_PASSWORD` en `.env` coincida con la de tu instalación.
 - **Puerto 3000 ocupado:** cambiar `PORT` en `.env` (recordar actualizar también la URL base en el frontend).
