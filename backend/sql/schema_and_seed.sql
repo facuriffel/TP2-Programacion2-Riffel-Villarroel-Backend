@@ -149,16 +149,16 @@ INSERT INTO especialidad (id, descripcion) VALUES
     (4, 'Clínica Médica')
 ON DUPLICATE KEY UPDATE descripcion = VALUES(descripcion);
 
--- Contraseñas (bcrypt): Admin123 / Operador123 / Medico123 / Paciente123
+-- Contraseñas (bcrypt): admin123 (administrador) / prueba123 (operador, médicos y pacientes)
 INSERT INTO usuario (id, nombre, apellido, dni, email, password, fecha_nacimiento, telefono, rol, id_cobertura, id_sede) VALUES
-    (1, 'Ana', 'Administradora', '10000001', 'admin@clinica.test', '$2b$10$Ak17DWJjzd3RVuQCWYd7Fu1G0z1SLihLhe7z6oJe78SAXKMin6fS6', '1985-03-10', NULL, 'administrador', NULL, NULL),
-    (2, 'Oscar', 'Operador', '30000001', 'operador@clinica.test', '$2b$10$Wbmh7iICAT1D9J.0AFX0deLuEmNzY83gtvTaaY71h8AcXpLFXGURy', '1990-07-21', NULL, 'operador', NULL, 1),
-    (3, 'Martín', 'Gómez', '20000001', 'medico@clinica.test', '$2b$10$SGHUdJwFLjqXDxTu1VO8EeOTEeSpifeluaHKQzgneIF8VA/Fq0Bvy', '1978-11-02', NULL, 'medico', NULL, 1),
-    (4, 'Lucía', 'Fernández', '20000002', 'medico2@clinica.test', '$2b$10$SGHUdJwFLjqXDxTu1VO8EeOTEeSpifeluaHKQzgneIF8VA/Fq0Bvy', '1982-05-15', NULL, 'medico', NULL, 2),
-    (5, 'Julián', 'Ramírez', '20000003', 'medico3@clinica.test', '$2b$10$SGHUdJwFLjqXDxTu1VO8EeOTEeSpifeluaHKQzgneIF8VA/Fq0Bvy', '1975-09-30', NULL, 'medico', NULL, 3),
-    (6, 'Paula', 'Pérez', '40000001', 'paciente@clinica.test', '$2b$10$RYId9x4Fd1weYGJW7GdESOsQIFOYPGfUfbqKP6qM1XxphH7XzJVJi', '1995-02-14', '011 5555-0001', 'paciente', 1, NULL),
-    (7, 'Carlos', 'López', '40000002', 'paciente2@clinica.test', '$2b$10$RYId9x4Fd1weYGJW7GdESOsQIFOYPGfUfbqKP6qM1XxphH7XzJVJi', '1960-08-03', '011 5555-0002', 'paciente', 2, NULL),
-    (8, 'Sofía', 'Díaz', '40000003', 'paciente3@clinica.test', '$2b$10$RYId9x4Fd1weYGJW7GdESOsQIFOYPGfUfbqKP6qM1XxphH7XzJVJi', '2015-12-25', NULL, 'paciente', 3, NULL)
+    (1, 'Ana', 'Administradora', '12312312', 'admin@clinica.test', '$2b$10$5dTnyl/H1MDH3dhfSaE4t.azaom.7B2ZWHX300LcNaIM9jFvcI9oK', '1985-03-10', NULL, 'administrador', NULL, NULL),
+    (2, 'Oscar', 'Operador', '40123123', 'operador@gmail.com', '$2b$10$z15mfo2sqK.QJx1kM9aUmOwo8QhI64Z3JQTmbmx3VPuaDN9q/Ey/e', '1990-07-21', NULL, 'operador', NULL, 1),
+    (3, 'Martín', 'Gómez', '41123123', 'medico@gmail.com', '$2b$10$z15mfo2sqK.QJx1kM9aUmOwo8QhI64Z3JQTmbmx3VPuaDN9q/Ey/e', '1978-11-02', NULL, 'medico', NULL, 1),
+    (4, 'Lucía', 'Fernández', '20000002', 'medico2@clinica.test', '$2b$10$z15mfo2sqK.QJx1kM9aUmOwo8QhI64Z3JQTmbmx3VPuaDN9q/Ey/e', '1982-05-15', NULL, 'medico', NULL, 2),
+    (5, 'Julián', 'Ramírez', '20000003', 'medico3@clinica.test', '$2b$10$z15mfo2sqK.QJx1kM9aUmOwo8QhI64Z3JQTmbmx3VPuaDN9q/Ey/e', '1975-09-30', NULL, 'medico', NULL, 3),
+    (6, 'Paula', 'Pérez', '42123123', 'paciente@clinica.test', '$2b$10$z15mfo2sqK.QJx1kM9aUmOwo8QhI64Z3JQTmbmx3VPuaDN9q/Ey/e', '1995-02-14', '011 5555-0001', 'paciente', 1, NULL),
+    (7, 'Carlos', 'López', '43123123', 'paciente2@clinica.test', '$2b$10$z15mfo2sqK.QJx1kM9aUmOwo8QhI64Z3JQTmbmx3VPuaDN9q/Ey/e', '1960-08-03', '011 5555-0002', 'paciente', 2, NULL),
+    (8, 'Sofía', 'Díaz', '44123123', 'paciente3@clinica.test', '$2b$10$z15mfo2sqK.QJx1kM9aUmOwo8QhI64Z3JQTmbmx3VPuaDN9q/Ey/e', '2015-12-25', NULL, 'paciente', 3, NULL)
 ON DUPLICATE KEY UPDATE nombre = VALUES(nombre), apellido = VALUES(apellido), dni = VALUES(dni), email = VALUES(email),
     password = VALUES(password), fecha_nacimiento = VALUES(fecha_nacimiento), telefono = VALUES(telefono),
     rol = VALUES(rol), id_cobertura = VALUES(id_cobertura), id_sede = VALUES(id_sede);
